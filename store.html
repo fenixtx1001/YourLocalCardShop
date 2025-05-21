@@ -78,8 +78,8 @@
 
   function renderCard() {
     const card = pack[currentIndex];
-    document.getElementById('card-image').src = card['Direct Image URL'];
-    document.getElementById('card-name').innerText = `${card.Player} (#${card['Card Number']})`;
+    document.getElementById('card-image').src = card.ImageURL;
+    document.getElementById('card-name').innerText = `${card.Player} (#${card['CardNumber']})`;
     document.getElementById('card-type').innerText = `Type: ${card.Type}`;
     document.getElementById('card-value').innerText = `Est. Value: $${card.Value}`;
   }
