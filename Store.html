@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Store - Your Local Card Shop</title>
+<style>
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen,
+    Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+    background: #f7f2ea; margin: 0; padding: 1rem; color: #3a2e1f; }
+  h1 { text-align: center; }
+  #packRipper { margin-top: 2rem; text-align: center; }
+  button {
+    font-size: 1.2rem;
+    padding: 0.8rem 2rem;
+    border-radius: 10px;
+    border: none;
+    background-color: #6b4c1d;
+    color: white;
+    cursor: pointer;
+    box-shadow: 2px 2px 6px rgba(0,0,0,0.2);
+    transition: background-color 0.3s ease;
+  }
+  button:hover { background-color: #4b2e05; }
+  #cardContainer {
+    margin-top: 2rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  img.cardImage {
+    width: 220px;
+    height: 300px;
+    object-fit: contain;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+    border-radius: 12px;
+  }
+  #cardInfo {
+    margin-top: 10px;
+    font-weight: bold;
+  }
+</style>
+</head>
+<body>
+  <h1>Your Local Card Shop - Baseball Packs</h1>
+  <div id="packRipper">
+    <button id="ripPackBtn">Rip a 5-Card Pack</button>
+    <div id="cardContainer">
+      <img id="cardImage" class="cardImage" src="" alt="Card image" style="display:none;" />
+      <div id="cardInfo"></div>
+    </div>
+  </div>
+
+<script>
+  // Hardcoded 25 cards with your real image URLs from your checklist spreadsheet:
+  const cards = [
+    { number: "1", player: "Bo Jackson", image: "https://drive.google.com/uc?export=view&id=1C0c3nXVkb-jVbFELtcexEljdot7gXoR0" },
+    { number: "2", player: "Steve Sax", image: "https://drive.google.com/uc?export=view&id=1ADlp5L9kSO9X5UBbs9HQD71nXgi2Loaw" },
+    { number: "3", player: "Ruben Sierra", image: "https://drive.google.com/uc?export=view&id=1_XBRx9qVryDQX0ivnUw1O8TrAjk7FTEp" },
+    { number: "4", player: "Ken Griffey, Jr.", image: "https://drive.google.com/uc?export=view&id=1rwhTUEqelJQ6tSDzqphuj7-lMcvOYXY3" },
+    { number: "5", player: "Mickey Tettleton", image: "https://drive.google.com/uc?export=view&id=1y3HJf-M_W98c1cjSsiPbGS6frjUlq3xe" },
+    { number: "6", player: "Dave Stewart", image: "https://drive.google.com/uc?export=view&id=1HnJ9jwPSJ8n31NJU1ipFqLgs-vVoElMI" },
+    { number: "7", player: "Jim Deshaies", image: "https://drive.google.com/uc?export=view&id=1C1BEMXdJ-XGx4MTKkuP1xmEWKo-ELGhS" },
+    { number: "8", player: "John Smoltz", image: "https://drive.google.com/uc?export=view&id=1P4vPbSJk6mxOq68EDArLUQHXbZtxBPPZ" },
+    { number: "9", player: "Mike Bielecki", image: "https://drive.google.com/uc?export=view&id=1U4L1F9plx79vYMsRKG3Opq9U8Ka56W4R" },
+    { number: "10", player: "Brian Downing", image: "https://drive.google.com/uc?export=view&id=1OuHbU12XmZn45PSFqgIFb3lO39kC_x08" },
+    { number: "11", player: "Kevin Mitchell", image: "https://drive.google.com/uc?export=view&id=1wYHaRuy_3HyhcN2rC-0lTpE6b-rPqjKZ" },
+    { number: "12", player: "Kelly Gruber", image: "https://drive.google.com/uc?export=view&id=1oL-r0WDMvuN9QG8Kn7aLUbPk9Po-IbNn" },
+    { number: "13", player: "Joe Magrane", image: "https://drive.google.com/uc?export=view&id=1l2W8P2v0fu_wdPzzijrjMjQMG7b2yRcw" },
+    { number: "14", player: "John Franco", image: "https://drive.google.com/uc?export=view&id=1a0eLoEUD9Jl64TY9tL9OANMq9WqaBEs_" },
+    { number: "15", player: "Ozzie Guillen", image: "https://drive.google.com/uc?export=view&id=1fP3x3NH6VjPoMMrV2UYkF_n_mA8Me7XL" },
+    { number: "16", player: "Lou Whitaker", image: "https://drive.google.com/uc?export=view&id=1y2GaxCuvJAnKJ7PiFCG3Rm9BqlbcxweO" },
+    { number: "17", player: "John Smiley", image: "https://drive.google.com/uc?export=view&id=1_Xf_u6w1ZAYnR_7bqToqO2vJv6EMCJHw" },
+    { number: "18", player: "Howard Johnson", image: "https://drive.google.com/uc?export=view&id=1lwYLhYL8L8YZ87xt2AJzFC--ScBx0axX" },
+    { number: "19", player: "Willie Randolph", image: "https://drive.google.com/uc?export=view&id=1PhHndyNgphsoafIx4Nq9P6BBzOgRV8fM" },
+    { number: "20", player: "Chris Bosio", image: "https://drive.google.com/uc?export=view&id=1v7uAMiZEGZpYJ-qwpQyrl4b6pGuquV0r" },
+    { number: "21", player: "Tom Herr", image: "https://drive.google.com/uc?export=view&id=1wvmWxRBE4RvMmxZPbs51xDdJ2AX-k_6a" },
+    { number: "22", player: "Dan Gladden", image: "https://drive.google.com/uc?export=view&id=1Xp6KlLWNPke31igHlCHVq12M2o9ex27R" },
+    { number: "23", player: "Ellis Burks", image: "https://drive.google.com/uc?export=view&id=1pehHq1wt_Dmx-IbRfY7qlcEQOSVTRKUC" },
+    { number: "24", player: "Pete O'Brien", image: "https://drive.google.com/uc?export=view&id=1QvvpC8-j85NlTC-9AhQgsx3fTS32xGcK" },
+    { number: "25", player: "Bryn Smith", image: "https://drive.google.com/uc?export=view&id=1pTOqMCjLCd7-c1bMcl7j_Z6t0KXEyqbm" }
+  ];
+
+  let currentCardIndex = 0;
+
+  document.getElementById("ripPackBtn").addEventListener("click", () => {
+    currentCardIndex = 0;
+    showNextCard();
+  });
+
+  function showNextCard() {
+    if (currentCardIndex >= 5) {
+      alert("Pack complete! Rip another?");
+      return;
+    }
+    // Random card from cards array
+    const randomIndex = Math.floor(Math.random() * cards.length);
+    const card = cards[randomIndex];
+    const imgEl = document.getElementById("cardImage");
+    const infoEl = document.getElementById("cardInfo");
+    imgEl.src = card.image;
+    imgEl.style.display = "block";
+    infoEl.textContent = `#${card.number} - ${card.player}`;
+    currentCardIndex++;
+  }
+</script>
+</body>
+</html>
