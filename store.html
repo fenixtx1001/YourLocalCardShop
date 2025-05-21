@@ -1,102 +1,135 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Store - Your Local Card Shop</title>
-<style>
-  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen,
-    Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
-    background: #f7f2ea; margin: 0; padding: 1rem; color: #3a2e1f; }
-  h1 { text-align: center; }
-  #packRipper { margin-top: 2rem; text-align: center; }
-  button {
-    font-size: 1.2rem;
-    padding: 0.8rem 2rem;
-    border-radius: 10px;
-    border: none;
-    background-color: #6b4c1d;
-    color: white;
-    cursor: pointer;
-    box-shadow: 2px 2px 6px rgba(0,0,0,0.2);
-    transition: background-color 0.3s ease;
-  }
-  button:hover { background-color: #4b2e05; }
-  #cardContainer {
-    margin-top: 2rem;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-  }
-  img.cardImage {
-    width: 220px;
-    height: 300px;
-    object-fit: contain;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
-    border-radius: 12px;
-  }
-  #cardInfo {
-    margin-top: 10px;
-    font-weight: bold;
-  }
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Store - Your Local Card Shop</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen,
+        Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+      background: #f7f2ea;
+      margin: 0;
+      padding: 1rem;
+      color: #3a2e1f;
+    }
+    h1 {
+      text-align: center;
+    }
+    #packRipper {
+      margin-top: 2rem;
+      text-align: center;
+    }
+    button {
+      font-size: 1.2rem;
+      padding: 0.8rem 2rem;
+      border-radius: 10px;
+      border: none;
+      background-color: #6b4c1d;
+      color: white;
+      cursor: pointer;
+      box-shadow: 2px 2px 6px rgba(0,0,0,0.2);
+      transition: background-color 0.3s ease;
+    }
+    button:hover {
+      background-color: #4b2e05;
+    }
+    #card-container {
+      margin-top: 2rem;
+      display: none;
+      flex-direction: column;
+      align-items: center;
+    }
+    #card-container img {
+      width: 220px;
+      height: 300px;
+      object-fit: contain;
+      box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+      border-radius: 12px;
+      margin-bottom: 1rem;
+    }
+    #card-name {
+      font-weight: bold;
+      margin-bottom: 1rem;
+    }
+  </style>
 </head>
 <body>
   <h1>Your Local Card Shop - Baseball Packs</h1>
+
   <div id="packRipper">
     <button id="ripPackBtn">Rip a 5-Card Pack</button>
-    <div id="cardContainer">
-      <img id="cardImage" class="cardImage" src="" alt="Card image" style="display:none;" />
-      <div id="cardInfo"></div>
-    </div>
   </div>
 
-<script>
-  const cards = [
-    {
-      name: "Ken Griffey Jr.",
-      imageUrl: "https://images.tcdb.com/large/7/7/677-407971Fr.jpg"
-    },
-    {
-      name: "Bo Jackson",
-      imageUrl: "https://images.tcdb.com/large/7/7/677-407993Fr.jpg"
-    },
-    {
-      name: "Cal Ripken Jr.",
-      imageUrl: "https://images.tcdb.com/large/7/7/677-407995Fr.jpg"
+  <div id="card-container">
+    <img id="card-image" src="" alt="Card image" />
+    <p id="card-name"></p>
+    <button onclick="prevCard()">Previous</button>
+    <button onclick="nextCard()">Next</button>
+  </div>
+
+  <script>
+    const allCards = [
+      {
+        name: "Ken Griffey Jr.",
+        imageUrl: "https://images.tcdb.com/large/7/7/677-407971Fr.jpg"
+      },
+      {
+        name: "Bo Jackson",
+        imageUrl: "https://images.tcdb.com/large/7/7/677-407993Fr.jpg"
+      },
+      {
+        name: "Cal Ripken Jr.",
+        imageUrl: "https://images.tcdb.com/large/7/7/677-407995Fr.jpg"
+      },
+      {
+        name: "Frank Thomas",
+        imageUrl: "https://images.tcdb.com/large/7/7/677-407987Fr.jpg"
+      },
+      {
+        name: "Nolan Ryan",
+        imageUrl: "https://images.tcdb.com/large/7/7/677-407980Fr.jpg"
+      },
+      {
+        name: "Jose Canseco",
+        imageUrl: "https://images.tcdb.com/large/7/7/677-407992Fr.jpg"
+      }
+    ];
+
+    let pack = [];
+    let currentIndex = 0;
+
+    function renderCard() {
+      const card = pack[currentIndex];
+      document.getElementById('card-image').src = card.imageUrl;
+      document.getElementById('card-name').innerText = card.name;
     }
-    // Add more cards here in the same format
-  ];
 
-  let currentIndex = 0;
+    function nextCard() {
+      if (currentIndex < pack.length - 1) {
+        currentIndex++;
+        renderCard();
+      }
+    }
 
-  function renderCard() {
-    const card = cards[currentIndex];
-    document.getElementById('card-image').src = card.imageUrl;
-    document.getElementById('card-name').innerText = card.name;
-  }
+    function prevCard() {
+      if (currentIndex > 0) {
+        currentIndex--;
+        renderCard();
+      }
+    }
 
-  function nextCard() {
-    if (currentIndex < cards.length - 1) {
-      currentIndex++;
+    document.getElementById('ripPackBtn').addEventListener('click', () => {
+      // Randomly pick 5 cards from allCards
+      pack = [];
+      while (pack.length < 5) {
+        const rand = allCards[Math.floor(Math.random() * allCards.length)];
+        if (!pack.includes(rand)) pack.push(rand);
+      }
+      currentIndex = 0;
       renderCard();
-    }
-  }
-
-  function prevCard() {
-    if (currentIndex > 0) {
-      currentIndex--;
-      renderCard();
-    }
-  }
-
-  window.onload = renderCard;
-</script>
-  <div id="card-container" style="text-align:center;">
-  <img id="card-image" style="max-width:300px; display:block; margin:auto;" />
-  <p id="card-name" style="font-weight:bold;"></p>
-  <button onclick="prevCard()">Previous</button>
-  <button onclick="nextCard()">Next</button>
-</div>
+      document.getElementById('card-container').style.display = 'flex';
+    });
+  </script>
 </body>
 </html>
