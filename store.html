@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+  <script src="https://cdn.jsdelivr.net/npm/tabletop@1.6.1/tabletop.min.js"></script>
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -60,76 +61,94 @@
   <div id="packRipper">
     <button id="ripPackBtn">Rip a 5-Card Pack</button>
   </div>
+<div id="card-container" style="display:none; flex-direction:column; align-items:center; margin-top:2rem;">
+  <img id="card-image" src="" alt="Card image" style="width:220px; height:300px; object-fit:contain; border-radius:12px; box-shadow:0 4px 8px rgba(0,0,0,0.15);" />
+  <p id="card-name" style="font-weight:bold;"></p>
+  <p id="card-type"></p>
+  <p id="card-value"></p>
+  <button onclick="prevCard()">Previous</button>
+  <button onclick="nextCard()">Next</button>
+</div>
 
-  <div id="card-container">
-    <img id="card-image" src="" alt="Card image" />
-    <p id="card-name"></p>
-    <button onclick="prevCard()">Previous</button>
-    <button onclick="nextCard()">Next</button>
   </div>
+    <script>
+  let allCards = [];
+  let pack = [];
+  let currentIndex = 0;
 
-  <script>
-    const allCards = [
-      {
-        name: "Ken Griffey Jr.",
-        imageUrl: "https://images.tcdb.com/large/7/7/677-407971Fr.jpg"
-      },
-      {
-        name: "Bo Jackson",
-        imageUrl: "https://images.tcdb.com/large/7/7/677-407993Fr.jpg"
-      },
-      {
-        name: "Cal Ripken Jr.",
-        imageUrl: "https://images.tcdb.com/large/7/7/677-407995Fr.jpg"
-      },
-      {
-        name: "Frank Thomas",
-        imageUrl: "https://images.tcdb.com/large/7/7/677-407987Fr.jpg"
-      },
-      {
-        name: "Nolan Ryan",
-        imageUrl: "https://images.tcdb.com/large/7/7/677-407980Fr.jpg"
-      },
-      {
-        name: "Jose Canseco",
-        imageUrl: "https://images.tcdb.com/large/7/7/677-407992Fr.jpg"
-      }
-    ];
+  function renderCard() {
+    const card = pack[currentIndex];
+    document.getElementById('card-image').src = card['Image URL'];
+    document.getElementById('card-name').innerText = `${card.Player} (#${card['Card Number']})`;
+    document.getElementById('card-type').innerText = `Type: ${card.Type}`;
+    document.getElementById('card-value').innerText = `Est. Value: $${card.Value}`;
+  }
 
-    let pack = [];
-    let currentIndex = 0;
-
-    function renderCard() {
-      const card = pack[currentIndex];
-      document.getElementById('card-image').src = card.imageUrl;
-      document.getElementById('card-name').innerText = card.name;
-    }
-
-    function nextCard() {
-      if (currentIndex < pack.length - 1) {
-        currentIndex++;
-        renderCard();
-      }
-    }
-
-    function prevCard() {
-      if (currentIndex > 0) {
-        currentIndex--;
-        renderCard();
-      }
-    }
-
-    document.getElementById('ripPackBtn').addEventListener('click', () => {
-      // Randomly pick 5 cards from allCards
-      pack = [];
-      while (pack.length < 5) {
-        const rand = allCards[Math.floor(Math.random() * allCards.length)];
-        if (!pack.includes(rand)) pack.push(rand);
-      }
-      currentIndex = 0;
+  function nextCard() {
+    if (currentIndex < pack.length - 1) {
+      currentIndex++;
       renderCard();
-      document.getElementById('card-container').style.display = 'flex';
+    }
+  }
+
+  function prevCard() {
+    if (currentIndex > 0) {
+      currentIndex--;
+      renderCard();
+    }
+  }
+
+  function ripPack() {
+    if (allCards.length === 0) {
+      alert("Cards not loaded yet. Please wait a few seconds.");
+      return;
+    }
+
+    pack = [];
+
+    // Insert odds
+    const base = allCards.filter(c => c.Type === "Base");
+    const ratedRookies = allCards.filter(c => c.Type === "Rated Rookie");
+    const diamondKings = allCards.filter(c => c.Type === "Diamond Kings");
+    const mvps = allCards.filter(c => c.Type === "MVP");
+
+    function randomCard(list) {
+      return list[Math.floor(Math.random() * list.length)];
+    }
+
+    // 1 in 5 chance for Rated Rookie, DK, or MVP
+    const odds = Math.random();
+
+    // Base pack
+    for (let i = 0; i < 5; i++) {
+      if (i === 0 && odds < 0.2 && ratedRookies.length) {
+        pack.push(randomCard(ratedRookies));
+      } else if (i === 1 && odds < 0.2 && diamondKings.length) {
+        pack.push(randomCard(diamondKings));
+      } else if (i === 2 && odds < 0.2 && mvps.length) {
+        pack.push(randomCard(mvps));
+      } else {
+        pack.push(randomCard(base));
+      }
+    }
+
+    currentIndex = 0;
+    renderCard();
+    document.getElementById('card-container').style.display = 'flex';
+  }
+
+  window.onload = function() {
+    Tabletop.init({
+      key: 'https://docs.google.com/spreadsheets/d/1-ZMcxox4TgVmXYyqjK3wxjt7s0xZi2rmLL1jv3sc8Fs/edit?usp=sharing',
+      simpleSheet: true,
+      callback: function(data) {
+        allCards = data;
+        console.log("Loaded cards:", allCards.length);
+      }
     });
-  </script>
+
+    document.getElementById('ripPackBtn').addEventListener('click', ripPack);
+  };
+</script>
 </body>
 </html>
