@@ -1,14 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
-  <script src="https://cdn.jsdelivr.net/npm/tabletop@1.6.1/tabletop.min.js"></script>
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Store - Your Local Card Shop</title>
   <style>
     body {
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen,
-        Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Open Sans", "Helvetica Neue", sans-serif;
       background: #f7f2ea;
       margin: 0;
       padding: 1rem;
@@ -18,8 +16,8 @@
       text-align: center;
     }
     #packRipper {
-      margin-top: 2rem;
       text-align: center;
+      margin-top: 2rem;
     }
     button {
       font-size: 1.2rem;
@@ -41,7 +39,7 @@
       flex-direction: column;
       align-items: center;
     }
-    #card-container img {
+    #card-image {
       width: 220px;
       height: 300px;
       object-fit: contain;
@@ -51,104 +49,128 @@
     }
     #card-name {
       font-weight: bold;
-      margin-bottom: 1rem;
+      margin-bottom: 0.3rem;
+    }
+    #card-type,
+    #card-value {
+      margin: 0;
     }
   </style>
 </head>
 <body>
-  <h1>Your Local Card Shop - Baseball Packs</h1>
-
+  <h1>Your Local Card Shop - 1990 Donruss</h1>
   <div id="packRipper">
     <button id="ripPackBtn">Rip a 5-Card Pack</button>
+    <p id="loadingMessage" style="display: none;">Loading card database...</p>
   </div>
-<div id="card-container" style="display:none; flex-direction:column; align-items:center; margin-top:2rem;">
-  <img id="card-image" src="" alt="Card image" style="width:220px; height:300px; object-fit:contain; border-radius:12px; box-shadow:0 4px 8px rgba(0,0,0,0.15);" />
-  <p id="card-name" style="font-weight:bold;"></p>
-  <p id="card-type"></p>
-  <p id="card-value"></p>
-  <button onclick="prevCard()">Previous</button>
-  <button onclick="nextCard()">Next</button>
-</div>
-
+  <div id="card-container">
+    <img id="card-image" src="" alt="Card image" onerror="this.src='https://via.placeholder.com/220x300?text=Image+Unavailable'" />
+    <p id="card-name"></p>
+    <p id="card-type"></p>
+    <p id="card-value"></p>
+    <button onclick="prevCard()">Previous</button>
+    <button onclick="nextCard()">Next</button>
   </div>
-    <script>
-  let allCards = [];
-  let pack = [];
-  let currentIndex = 0;
+  <script>
+    let pack = [];
+    let currentIndex = 0;
 
-  function renderCard() {
-    const card = pack[currentIndex];
-    document.getElementById('card-image').src = card.ImageURL;
-    document.getElementById('card-name').innerText = `${card.Player} (#${card['CardNumber']})`;
-    document.getElementById('card-type').innerText = `Type: ${card.Type}`;
-    document.getElementById('card-value').innerText = `Est. Value: $${card.Value}`;
-  }
-
-  function nextCard() {
-    if (currentIndex < pack.length - 1) {
-      currentIndex++;
-      renderCard();
-    }
-  }
-
-  function prevCard() {
-    if (currentIndex > 0) {
-      currentIndex--;
-      renderCard();
-    }
-  }
-
-  function ripPack() {
-    if (allCards.length === 0) {
-      alert("Cards not loaded yet. Please wait a few seconds.");
-      return;
+    async function fetchCards() {
+      const sheetId = "1-ZMcxox4TgVmXYyqjK3wxjt7s0xZi2rmLL1jv3sc8Fs";
+      const sheetName = "Base";
+      const url = `https://opensheet.elk.sh/${sheetId}/${sheetName}`;
+      const response = await fetch(url);
+      return await response.json();
     }
 
-    pack = [];
-
-    // Insert odds
-    const base = allCards.filter(c => c.Type === "Base");
-    const ratedRookies = allCards.filter(c => c.Type === "Rated Rookie");
-    const diamondKings = allCards.filter(c => c.Type === "Diamond Kings");
-    const mvps = allCards.filter(c => c.Type === "MVP");
-
-    function randomCard(list) {
-      return list[Math.floor(Math.random() * list.length)];
+    function rollDie(sides) {
+      return Math.floor(Math.random() * sides) + 1;
     }
 
-    // 1 in 5 chance for Rated Rookie, DK, or MVP
-    const odds = Math.random();
+    function parseOdds(odds) {
+      if (!odds) return null;
+      const parts = odds.split(":");
+      return parts.length === 2 ? parseInt(parts[1], 10) : null;
+    }
 
-    // Base pack
-    for (let i = 0; i < 5; i++) {
-      if (i === 0 && odds < 0.2 && ratedRookies.length) {
-        pack.push(randomCard(ratedRookies));
-      } else if (i === 1 && odds < 0.2 && diamondKings.length) {
-        pack.push(randomCard(diamondKings));
-      } else if (i === 2 && odds < 0.2 && mvps.length) {
-        pack.push(randomCard(mvps));
-      } else {
-        pack.push(randomCard(base));
+    function getRandomFrom(arr, count) {
+      return [...arr].sort(() => 0.5 - Math.random()).slice(0, count);
+    }
+
+    function groupByInsert(cards) {
+      const inserts = {};
+      for (const card of cards) {
+        if (card.Insert) {
+          if (!inserts[card.Insert]) inserts[card.Insert] = [];
+          inserts[card.Insert].push(card);
+        }
+      }
+      return inserts;
+    }
+
+    function buildPackFromData(cards, size = 5) {
+      let pack = [];
+      const base = cards.filter(c => !c.Insert);
+      const inserts = groupByInsert(cards);
+
+      for (const insertName in inserts) {
+        const group = inserts[insertName];
+        const odds = parseOdds(group[0].Odds);
+        if (!odds) continue;
+
+        if (odds === 1 || rollDie(odds) === 1) {
+          pack.push(getRandomFrom(group, 1)[0]);
+        }
+      }
+
+      const baseCount = size - pack.length;
+      if (baseCount > 0) {
+        pack = pack.concat(getRandomFrom(base, baseCount));
+      }
+
+      return pack;
+    }
+
+    function renderCard() {
+      const card = pack[currentIndex] || {};
+      console.log("Rendering card:", card);
+      const img = card.ImageURL?.trim() || 'https://via.placeholder.com/220x300?text=No+Image';
+      const value = parseFloat(card.Value?.replace(/[^0-9.]/g, ''));
+      const displayValue = isNaN(value) ? "N/A" : `$${value.toFixed(2)}`;
+
+      document.getElementById('card-image').src = img;
+      document.getElementById('card-name').innerText = `${card.Player || 'Unknown'} (#${card.CardNumber || '?'})`;
+      document.getElementById('card-type').innerText = `Type: ${card.Type || 'Unknown'}`;
+      document.getElementById('card-value').innerText = `Est. Value: ${displayValue}`;
+    }
+
+    function nextCard() {
+      if (currentIndex < pack.length - 1) {
+        currentIndex++;
+        renderCard();
       }
     }
 
-    currentIndex = 0;
-    renderCard();
-    document.getElementById('card-container').style.display = 'flex';
-  }
-
-  window.onload = function() {
-    Tabletop.init({
-      key: 'https://docs.google.com/spreadsheets/d/1-ZMcxox4TgVmXYyqjK3wxjt7s0xZi2rmLL1jv3sc8Fs/edit?usp=sharing',
-      simpleSheet: true,
-      callback: function(data) {
-        allCards = data;
-        console.log("Loaded cards:", allCards.length);
+    function prevCard() {
+      if (currentIndex > 0) {
+        currentIndex--;
+        renderCard();
       }
+    }
+
+    async function ripPack() {
+      document.getElementById("loadingMessage").style.display = "block";
+      const cards = await fetchCards();
+      pack = buildPackFromData(cards);
+      currentIndex = 0;
+      renderCard();
+      document.getElementById("card-container").style.display = "flex";
+      document.getElementById("loadingMessage").style.display = "none";
+    }
+
+    document.addEventListener("DOMContentLoaded", () => {
+      document.getElementById("ripPackBtn").addEventListener("click", ripPack);
     });
-
-    document.getElementById('ripPackBtn').addEventListener('click', ripPack);
-  };
-</script>
+  </script>
 </body>
 </html>
