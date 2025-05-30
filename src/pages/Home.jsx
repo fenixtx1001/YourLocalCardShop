@@ -1,4 +1,4 @@
-import { button } from "../components/ui/button";
+import { button } from "../components/ui/freshbutton";
 
 export default function Home() {
   return (
