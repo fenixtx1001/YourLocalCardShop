@@ -1,7 +1,7 @@
 // Updated pack opener with improved SheetID parsing, card value display, and sequential reveal
 
 import { useEffect, useState } from "react";
-import { Card, CardContent } from ".../components/ui/card";
+import { Card, CardContent } from "../components/ui/card";
 import { Button } from "../components/ui/freshbutton";
 
 export default function PackOpener() {
