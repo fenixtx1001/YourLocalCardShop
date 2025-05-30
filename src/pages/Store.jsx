@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { Card, CardContent } from "../components/ui/card";
-import Button from "../components/ui/freshbutton";
+import { Button } from "../components/ui/freshbutton";
 
 export default function Store() {
   const [sets, setSets] = useState([]);
