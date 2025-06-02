@@ -1,5 +1,7 @@
 import { Link } from 'react-router-dom';
-import { Button } from '../components/ui/freshbutton';
+import Button from '../components/ui/freshbutton';
+import Inventory from '../components/Inventory';
+import Bank from '../components/Bank';
 
 export default function Home() {
   return (
@@ -8,6 +10,10 @@ export default function Home() {
       <p className="text-lg mb-8 text-center text-slate-300">
         Rip packs, build your collection, and chase your favorite players.
       </p>
+
+      <Bank />
+      <Inventory />
+
       <Link to="/store">
         <Button>Enter the Shop</Button>
       </Link>
