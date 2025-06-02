@@ -1,4 +1,5 @@
 import { Link } from 'react-router-dom';
+import { Button } from '../components/ui/freshbutton';
 
 export default function Home() {
   return (
@@ -7,11 +8,9 @@ export default function Home() {
       <p className="text-lg mb-8 text-center text-slate-300">
         Rip packs, build your collection, and chase your favorite players.
       </p>
-<Link to="/store">
-  <Button>Enter the Shop</Button>
-</Link>
-
+      <Link to="/store">
+        <Button>Enter the Shop</Button>
+      </Link>
     </div>
   );
 }
-
