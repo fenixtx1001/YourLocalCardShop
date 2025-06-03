@@ -1,5 +1,5 @@
 import { Link } from 'react-router-dom';
-import Button from '../components/ui/freshbutton';
+import { Button } from '../components/ui/freshbutton';
 import Inventory from '../components/Inventory';
 import Bank from '../components/Bank';
 
