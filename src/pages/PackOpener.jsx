@@ -12,7 +12,6 @@ export default function PackOpener() {
 
   useEffect(() => {
     const pack = JSON.parse(localStorage.getItem("selectedPack"));
-    console.log("Selected pack:", pack);
 
     if (!pack) {
       setError("No pack selected");
@@ -27,13 +26,11 @@ export default function PackOpener() {
         const sheetId = match ? match[0] : rawSheetId;
 
         const url = `https://opensheet.elk.sh/${sheetId}/Base`;
-        console.log("Fetching checklist from:", url);
 
         const response = await fetch(url);
         if (!response.ok) throw new Error("Failed to fetch checklist");
         const data = await response.json();
-        console.log("Fetched checklist:", data);
-
+    
         if (!Array.isArray(data)) throw new Error("Checklist is not an array");
 
         const baseCards = data.filter(row => !row.Insert);
